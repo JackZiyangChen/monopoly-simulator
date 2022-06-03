@@ -1,4 +1,4 @@
-
+import random
 
 
 def game():
@@ -18,8 +18,9 @@ def turn(player):
     # handle housing
 
     # roll dice
-
+    moves = dice_roll()
     # move
+    player.location = (player.location+moves)%40
 
     # action
         # if housing
@@ -33,3 +34,7 @@ def turn(player):
 
 
     pass
+
+
+def dice_roll():
+    return random.randint(2,12)
