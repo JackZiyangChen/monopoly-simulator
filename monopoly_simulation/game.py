@@ -1,6 +1,7 @@
 import json
 import random
 from . import tile,player
+from . import utility as util
 
 
 def game(**kwargs):
@@ -57,6 +58,9 @@ def dice_roll():
 def buy_houses(participating_players):
     for player in participating_players:
         pass # prompt if buying houses
+
+
+
 
 
 class GameState:
