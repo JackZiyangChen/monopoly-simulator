@@ -9,18 +9,35 @@ def game(**kwargs):
     # initialize game and players
     gs = GameState()
 
+    # determine player order
+
+    in_game = True
+    turn_id = 0
+
     # while game
-    # play turn
-    turn(player.Player(), gs)
-    # switch player
+    while(in_game):
+        for p in gs.players:
+            p.player_action()
+        # play turn
+        turn(player.Player(), state=gs, repeat_round=0)
+        # switch player
+        turn_id = turn_id + 1 % len(gs.players)
 
 
 
-def turn(player, state):
+def turn(player, state, repeat_round):
+    if repeat_round > 2:
+        # move to jail
+        return
+
     # handle jail
-    if player.in_jail:
+    if player.rounds_in_jail>0:
         # check if eligible to get out
+        player.jail_round()
         player.rounds_in_jail -= 1
+
+    if player in state.eliminated_players:
+        return
 
 
     # handle housing
@@ -30,29 +47,22 @@ def turn(player, state):
     moves = rolls[0] + rolls[1]
 
     # move
-    player.location = (player.location+moves)%40
+    player.location = player.location+moves
+    if player.location > 39: # passed Go
+        player.money += 200
+        player.location = player.location%40
 
     state.tiles[player.location].round_action(game_state=state)
 
+    if rolls[0] == rolls[1]:
+        turn(player, state, repeat_round=repeat_round+1)
 
 
-
-    # action
-        # if housing
-            # check if bought: what are the rents
-            # else ask if want to buy
-        # if special card:
-            # railroad
-            # utility
-        # if land in jail
-        # if
-
-
-    pass
 
 
 def dice_roll():
     return random.randint(1,6)
+
 
 
 def buy_houses(participating_players):
@@ -66,6 +76,7 @@ def buy_houses(participating_players):
 class GameState:
     players = []
     tiles = []
+    eliminated_players = []
     houses_remaining = 32
     hotels_remaining = 12
     round = 0
