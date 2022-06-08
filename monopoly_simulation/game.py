@@ -52,7 +52,7 @@ def turn(player, state, repeat_round):
         player.money += 200
         player.location = player.location%40
 
-    state.tiles[player.location].round_action(game_state=state)
+    state.tiles[player.location].round_action(game_state=state, moves=moves)
 
     if rolls[0] == rolls[1]:
         turn(player, state, repeat_round=repeat_round+1)
