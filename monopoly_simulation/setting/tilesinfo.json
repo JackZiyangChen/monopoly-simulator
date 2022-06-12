@@ -1,3 +1,33 @@
 {
-  "Go": {}
+  "Chance": {
+    "type": "chance"
+  },
+  "Community Chess": {
+    "type": "drawable"
+  },
+  "Mediterranean Avenue": {
+    "type": "street",
+    "set": "brown",
+    "price": 60,
+    "base_rent": 2,
+    "premium_rent": [4,10,30,90,160,250],
+    "housing_cost": 50,
+    "mortgage": 30
+  },
+  "Reading Railroad": {
+    "type": "railroad",
+    "set": "railroad",
+    "price": 200,
+    "mortgage": 100
+  },
+  "Electric Company": {
+    "type": "utility",
+    "set": "utility",
+    "price": 150,
+    "mortgage": 75
+
+  },
+  "Go To Jail": {
+    "type": "jail"
+  }
 }

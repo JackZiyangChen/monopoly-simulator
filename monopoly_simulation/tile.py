@@ -33,6 +33,7 @@ class Property(Tile):
         if self.is_owned:
             rent = self.calculate_rent(game_master=kwarg.get('game_state'), dice_roll=kwarg.get('moves')) # calculate rents
             # apply rent to player
+            self.owner.money += rent
         else:
             if player.buy_property_handler():
                 # buy prpoerty
@@ -109,3 +110,8 @@ class PublicProperty(Property):
 
 class Drawable(Tile):
     pass
+
+
+class tax(Tile):
+    def round_action(self, player, **kwarg):
+        player.money -= 200

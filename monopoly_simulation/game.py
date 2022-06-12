@@ -2,17 +2,33 @@ import json
 import random
 from . import tile,player
 from . import utility as util
+from .player import Player
 
 
-def game(**kwargs):
+def game(number_of_players,**kwargs):
 
     # initialize game and players
     gs = GameState()
 
+    players_list = kwargs.get('players') if 'players' in kwargs.keys() else []
+    for i in range(abs(number_of_players-len(players_list))):
+        players_list.append(Player())
+
+
     # determine player order
+    init_players_dice_roll = {}
+    for p in players_list:
+        init_players_dice_roll.update({p, dice_roll()+dice_roll()})
+
+    ordered_players_list = dict(sorted(init_players_dice_roll.items(), key=lambda item: item[1]))
+
+
+
+
+
 
     in_game = True
-    turn_id = 0
+    turn_player = 0
 
     # while game
     while(in_game):
@@ -21,7 +37,7 @@ def game(**kwargs):
         # play turn
         turn(player.Player(), state=gs, repeat_round=0)
         # switch player
-        turn_id = turn_id + 1 % len(gs.players)
+        turn_player = turn_player + 1 % len(gs.players)
 
 
 
@@ -53,6 +69,10 @@ def turn(player, state, repeat_round):
         player.location = player.location%40
 
     state.tiles[player.location].round_action(game_state=state, moves=moves)
+
+    if player.money<0:
+        player.on_debt(amount=0-player.money)
+
 
     if rolls[0] == rolls[1]:
         turn(player, state, repeat_round=repeat_round+1)

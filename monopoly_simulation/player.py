@@ -29,8 +29,6 @@ class Player(PlayerActionsHandler):
         else:
             if self.jail_actions_handler():
                 self.money -= 50
-                if self.money < 0:
-                    self.on_debt(0-self.money)
                 return True
 
 
