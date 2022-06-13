@@ -16,11 +16,13 @@ def game(number_of_players,**kwargs):
 
 
     # determine player order
-    init_players_dice_roll = {}
     for p in players_list:
-        init_players_dice_roll.update({p, dice_roll()+dice_roll()})
+        p.init_roll = dice_roll() + dice_roll()
+        p.money = 1500
 
-    ordered_players_list = dict(sorted(init_players_dice_roll.items(), key=lambda item: item[1]))
+    players_list.sort(key=lambda player : player.init_roll, reverse=True)
+    gs.players = players_list
+
 
 
 
@@ -35,7 +37,7 @@ def game(number_of_players,**kwargs):
         for p in gs.players:
             p.player_action()
         # play turn
-        turn(player.Player(), state=gs, repeat_round=0)
+        turn(gs[turn_player], state=gs, repeat_round=0)
         # switch player
         turn_player = turn_player + 1 % len(gs.players)
 
@@ -44,6 +46,8 @@ def game(number_of_players,**kwargs):
 def turn(player, state, repeat_round):
     if repeat_round > 2:
         # move to jail
+        player.location = 10
+        player.rounds_in_jail = 3
         return
 
     # handle jail
