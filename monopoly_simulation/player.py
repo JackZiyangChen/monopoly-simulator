@@ -1,5 +1,15 @@
 
 
+class PlayerConcept:
+    id = 0
+    properties_owned = []
+    money = 0
+    rounds_in_jail = 0
+    mortgages = []
+    location = 0
+    num_jail_card = 0
+    jail_card = num_jail_card > 0
+
 class PlayerActionsHandler():
     def jail_card_handler(self):
         return True
@@ -13,15 +23,12 @@ class PlayerActionsHandler():
     def debt_handler(self,properties):
         return True
 
-class Player(PlayerActionsHandler):
-    id = 0
-    properties_owned = []
-    money = 0
-    rounds_in_jail = 0
-    mortgages = []
-    location = ""
-    jail_card = False
+    def place_bid(self):
+        return 0
 
+
+class Player(PlayerActionsHandler,PlayerConcept):
+    init_roll = 0
     def jail_round(self):
         if self.jail_card_handler():
             self.jail_card = False
