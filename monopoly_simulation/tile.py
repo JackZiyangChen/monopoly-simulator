@@ -45,7 +45,10 @@ class Property(Tile):
                 for p in kwarg.get('game_state').players:
                     if not player.__eq__(p):
                         auction_players.append(p)
-                self.owner = utility.auction(participants=auction_players,minimum_bid=self.price)
+                auction_winner= utility.auction(participants=auction_players,minimum_bid=self.price)
+                self.owner = kwarg.get('game_state').players[auction_winner]
+                self.owner.properties_owned.append(self)
+
 
 
     def get_others_in_set(self, game_master):
@@ -53,7 +56,7 @@ class Property(Tile):
         for tile in game_master.tiles:
             if isinstance(tile, Property):
                 if tile.set == self.set and (not tile.name == self.name):
-                    out.append((Property)(tile))
+                    out.append(tile)
 
         return out
 

@@ -22,6 +22,10 @@ def game(number_of_players,**kwargs):
 
     players_list.sort(key=lambda player : player.init_roll, reverse=True)
     gs.players = players_list
+    i=0
+    for player in gs.players:
+        player.id = i
+        i+=1
 
 
 
