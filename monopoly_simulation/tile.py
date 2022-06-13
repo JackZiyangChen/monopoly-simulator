@@ -39,6 +39,7 @@ class Property(Tile):
                 # buy prpoerty
                 player.money -= self.price
                 self.owner = player
+                player.properties_owned.append(self)
             else:
                 auction_players = []
                 for p in kwarg.get('game_state').players:
@@ -63,7 +64,7 @@ class Property(Tile):
 class Jail(Tile):
     def round_action(self, player, **kwarg):
         player.rounds_in_jail = 3
-        player.position = 10
+        player.location = 10
 
 
 
