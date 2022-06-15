@@ -24,13 +24,14 @@ class Property(Tile):
     base_rent = 0
     premium_rents = [] # 0 being set owned, 5 being hotel, rest being their respective number of houses
     set = ""
+    is_mortgaged = False
     # note: railroads/utility work differently
 
     def calculate_rent(self, game_master, **kwargs):
         pass
 
     def round_action(self, player, **kwarg):
-        if self.is_owned:
+        if self.is_owned and not self.is_mortgaged:
             rent = self.calculate_rent(game_master=kwarg.get('game_state'), dice_roll=kwarg.get('moves')) # calculate rents
             # apply rent to player
             self.owner.money += rent
@@ -117,5 +118,7 @@ class Drawable(Tile):
 
 
 class tax(Tile):
+    tax = 0
+
     def round_action(self, player, **kwarg):
-        player.money -= 200
+        player.money -= self.tax
