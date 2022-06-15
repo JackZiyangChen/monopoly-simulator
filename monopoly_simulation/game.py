@@ -3,6 +3,7 @@ import random
 from . import tile,player
 from . import utility as util
 from .player import Player
+from .utility import Trade
 
 
 def game(number_of_players,**kwargs):
@@ -42,6 +43,10 @@ def game(number_of_players,**kwargs):
             p.player_action()
         # play turn
         turn(gs[turn_player], state=gs, repeat_round=0)
+
+        # trade
+        trade(state=gs)
+
         # switch player
         turn_player = turn_player + 1 % len(gs.players)
 
@@ -96,6 +101,20 @@ def dice_roll():
 def buy_houses(participating_players):
     for player in participating_players:
         pass # prompt if buying houses
+
+
+def trade(state):
+    MAX_TRADE_ATTEMPTS_PER_ROUND = 7
+    for player in state.players:
+        i=0
+        trade_attempt = player.trade_handler(state=state)
+        while i<MAX_TRADE_ATTEMPTS_PER_ROUND and len(trade_attempt)>0:
+            if trade_attempt.target_player.accpet_trade(trade_attempt):
+                trade_attempt.execute(game_state=state)
+            trade_attempt = player.trade_handler(state=state)
+            i+=1
+
+
 
 
 

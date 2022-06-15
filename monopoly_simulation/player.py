@@ -11,20 +11,27 @@ class PlayerConcept:
     jail_card = num_jail_card > 0
 
 class PlayerActionsHandler():
-    def jail_card_handler(self):
+    def jail_card_handler(self, **kwargs):
         return True
 
-    def jail_actions_handler(self):
+    def jail_actions_handler(self, **kwargs):
         return True
 
-    def buy_property_handler(self):
+    def buy_property_handler(self, **kwargs):
         return True
 
-    def debt_handler(self,properties):
+    def debt_handler(self,properties, **kwargs):
         return True
 
-    def place_bid(self):
+    def place_bid(self, **kwargs):
         return 0
+
+    def trade_handler(self, state, **kwargs):
+        return []
+
+    def accept_trade(self, trade, **kwargs):
+        return False
+
 
 
 class Player(PlayerActionsHandler,PlayerConcept):
