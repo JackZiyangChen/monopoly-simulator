@@ -10,10 +10,15 @@ from .player import Player
 class Tile:
 
     name = ""
+    position = -1
 
 
     def round_action(self, player, **kwarg):
         pass
+
+
+    def __str__(self):
+        return f'({self.position}:{self.name})'
 
 
 
@@ -25,6 +30,7 @@ class Property(Tile):
     premium_rents = [] # 0 being set owned, 5 being hotel, rest being their respective number of houses
     set = ""
     is_mortgaged = False
+    mortgage = 0
     # note: railroads/utility work differently
 
     def calculate_rent(self, game_master, **kwargs):
@@ -92,6 +98,8 @@ class Street(Property):
                 return self.premium_rents[5]
             else:
                 return self.premium_rents[0]
+        else:
+            return self.base_rent
 
 
 
@@ -117,7 +125,7 @@ class Drawable(Tile):
     pass
 
 
-class tax(Tile):
+class Tax(Tile):
     tax = 0
 
     def round_action(self, player, **kwarg):
