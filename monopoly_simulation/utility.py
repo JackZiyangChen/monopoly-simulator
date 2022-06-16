@@ -1,5 +1,4 @@
 from .player import Player
-from .game import GameState
 
 
 def auction(participants, minimum_bid):

@@ -1,38 +1,110 @@
 import json
 import random
-from . import tile,player
+import os
+from pathlib import Path
 from . import utility as util
 from .player import Player
 from .utility import Trade
+from .tile import *
 
 
-def game(number_of_players,**kwargs):
 
+
+
+class GameState:
+    players = []
+    tiles = []
+    eliminated_players = []
+    houses_remaining = 32
+    hotels_remaining = 12
+    round = 0
+
+    def __init__(self, players):
+        self.players = players
+        map_data = {}
+        tile_to_add = Tile()
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(curr_dir,"setting/map.json"), "r") as map_file:
+            map_data = json.load(map_file)
+            with open(os.path.join(curr_dir,"setting/tilesinfo.json"), "r") as tilesinfo:
+                tiles_database = json.load(tilesinfo)
+                for i in range(0,40):
+                    if map_data[str(i)] not in tiles_database.keys():
+                        continue
+                    tile_info = tiles_database[map_data[str(i)]]
+                    type = tile_info['type']
+                    # switch on type
+                    if type == 'jail':
+                        tile_to_add = Jail()
+                    elif type == 'street':
+                        tile_to_add = Street()
+
+                        tile_to_add.set = tile_info['set']
+                        tile_to_add.price = tile_info['price']
+                        tile_to_add.base_rent = tile_info['base_rent']
+                        tile_to_add.premium_rents = tile_info['premium_rent']
+                        tile_to_add.housing_cost = tile_info['housing_cost']
+                        tile_to_add.mortgage = tile_info['mortgage']
+
+                    elif type == 'railroad' or type == 'utility':
+                        tile_to_add = PublicProperty()
+
+                        tile_to_add.set = tile_info['set']
+                        tile_to_add.price = tile_info['price']
+                        tile_to_add.mortgage = tile_info['mortgage']
+                    elif type == 'chance' or type == 'community chest':
+                        tile_to_add = Drawable()
+
+                        # TODO: come back and implement initialization after implementing functions
+                    elif type == 'tax':
+                        tile_to_add = Tax()
+
+                        tile_to_add.tax = tile_info['tax']
+                    else:
+                        tile_to_add = Tile()
+
+                    tile_to_add.name = map_data[str(i)]
+                    tile_to_add.position = i
+
+                    self.tiles.append(tile_to_add)
+
+        # sort through tiles list
+        self.tiles.sort(key=lambda tile: tile.position)
+
+
+
+
+def initialize_game(players_list):
     # initialize game and players
-    gs = GameState()
-
-    players_list = kwargs.get('players') if 'players' in kwargs.keys() else []
-    for i in range(abs(number_of_players-len(players_list))):
-        players_list.append(Player())
-
 
     # determine player order
     for p in players_list:
         p.init_roll = dice_roll() + dice_roll()
         p.money = 1500
 
-    players_list.sort(key=lambda player : player.init_roll, reverse=True)
+    players_list.sort(key=lambda player: player.init_roll, reverse=True)
+
+    gs = GameState(players=players_list)
+
     gs.players = players_list
-    i=0
+    i = 0
     for player in gs.players:
         player.id = i
-        i+=1
+        i += 1
+
+    return gs
 
 
 
+def game(number_of_players,**kwargs):
 
 
+    players_list = kwargs.get('players') if 'players' in kwargs.keys() else []
+    for i in range(abs(number_of_players - len(players_list))):
+        players_list.append(Player())
 
+
+    gs=initialize_game(players_list) # initialize game state
 
     in_game = True
     turn_player = 0
@@ -40,7 +112,7 @@ def game(number_of_players,**kwargs):
     # while game
     while(in_game):
         for p in gs.players:
-            p.player_action()
+            p.player_action() # TODO: use specific functions for specific player action (e.g. trading)
         # play turn
         turn(gs[turn_player], state=gs, repeat_round=0)
 
@@ -48,7 +120,7 @@ def game(number_of_players,**kwargs):
         trade(state=gs)
 
         # switch player
-        turn_player = turn_player + 1 % len(gs.players)
+        turn_player = (turn_player + 1) % len(gs.players)
 
 
 
@@ -120,23 +192,5 @@ def trade(state):
 
 
 
-class GameState:
-    players = []
-    tiles = []
-    eliminated_players = []
-    houses_remaining = 32
-    hotels_remaining = 12
-    round = 0
-
-    def __init__(self, players):
-        self.players = players
-        map_data = {}
-        with open("setting/maps.json", "r") as map_file:
-            map_data = json.load(map_file)
-            with open("setting/tilesinfo.json", "r") as tilesinfo:
-                tiles_database = json.load(tilesinfo)
-                for i in range(0,40):
-                    tile = tiles_database[map_data[str(i)]]
-                    # switch on type
 
 
