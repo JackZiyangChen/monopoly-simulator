@@ -36,6 +36,10 @@ class PlayerActionsHandler():
 
 class Player(PlayerActionsHandler,PlayerConcept):
     init_roll = 0
+
+    # TODO: implement a system to copy from game state, so decision can be made
+
+    # TODO: revisit jail system
     def jail_round(self):
         if self.jail_card_handler():
             self.jail_card = False
