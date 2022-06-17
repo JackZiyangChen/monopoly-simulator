@@ -19,17 +19,35 @@ class GameState:
     hotels_remaining = 12
     round = 0
 
+    CHANCES_DICT = {}
+    COMMUNITY_CHEST_DICT = {}
+
+    chances_queue = []
+    chances_queue_top = 0
+    community_chest_queue = []
+    community_chest_queue_top = 0
+
+
     def __init__(self, players):
         self.players = players
+        self.initialize_tiles()
+        self.initialize_drawables()
+
+
+    def initialize_tiles(self):
         map_data = {}
         tile_to_add = Tile()
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(curr_dir,"setting/map.json"), "r") as map_file:
+        with open(os.path.join(curr_dir, "setting/map.json"), "r") as map_file:
             map_data = json.load(map_file)
-            with open(os.path.join(curr_dir,"setting/tilesinfo.json"), "r") as tilesinfo:
+            with open(os.path.join(curr_dir, "setting/tilesinfo.json"), "r") as tilesinfo:
                 tiles_database = json.load(tilesinfo)
-                for i in range(0,40):
+                for i in range(0, 40):
                     if map_data[str(i)] not in tiles_database.keys():
+                        tile_to_add = Tile()
+                        tile_to_add.name = map_data[str(i)]
+                        tile_to_add.position = i
+                        self.tiles.append(tile_to_add)
                         continue
                     tile_info = tiles_database[map_data[str(i)]]
                     type = tile_info['type']
@@ -55,7 +73,7 @@ class GameState:
                     elif type == 'chance' or type == 'community chest':
                         tile_to_add = Drawable()
 
-                        # TODO: come back and implement initialization after implementing functions
+                        tile_to_add.drawable_type = type
                     elif type == 'tax':
                         tile_to_add = Tax()
 
@@ -70,6 +88,23 @@ class GameState:
 
         # sort through tiles list
         self.tiles.sort(key=lambda tile: tile.position)
+
+    def initialize_drawables(self):
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(curr_dir, "setting/drawables.json"), "r") as source_file:
+            src_dict = json.load(source_file)
+
+        for k,v in src_dict.items():
+            if v['type'] == 'community_chest':
+                self.COMMUNITY_CHEST_DICT[k] = v
+                self.community_chest_queue.append(k)
+            elif v['type'] == 'chance':
+                self.CHANCES_DICT[k] = v
+                self.chances_queue.append(k)
+
+        random.shuffle(self.chances_queue)
+        random.shuffle(self.community_chest_queue)
+
 
 
 
@@ -99,7 +134,7 @@ def initialize_game(players_list):
 def game(number_of_players,**kwargs):
 
 
-    players_list = kwargs.get('players') if 'players' in kwargs.keys() else []
+    players_list = kwargs.get('../players') if 'players' in kwargs.keys() else []
     for i in range(abs(number_of_players - len(players_list))):
         players_list.append(Player())
 
@@ -121,6 +156,7 @@ def game(number_of_players,**kwargs):
 
         # switch player
         turn_player = (turn_player + 1) % len(gs.players)
+        gs.round += 1
 
 
 
@@ -139,9 +175,6 @@ def turn(player, state, repeat_round):
 
     if player in state.eliminated_players:
         return
-
-
-    # handle housing
 
     # roll dice
     rolls = [dice_roll(),dice_roll()]
@@ -171,6 +204,7 @@ def dice_roll():
 
 
 def buy_houses(participating_players):
+    # TODO: implement buy houses
     for player in participating_players:
         pass # prompt if buying houses
 
