@@ -1,9 +1,12 @@
 {
+  "Go": {
+    "type": "other"
+  },
   "Chance": {
     "type": "chance"
   },
   "Community Chess": {
-    "type": "drawable"
+    "type": "community chest"
   },
   "Mediterranean Avenue": {
     "type": "street",
@@ -14,11 +17,51 @@
     "housing_cost": 50,
     "mortgage": 30
   },
+  "Baltic Avenue": {
+    "type": "street",
+    "set": "brown",
+    "price": 60,
+    "base_rent": 4,
+    "premium_rent": [8,20,60,180,320,450],
+    "housing_cost": 50,
+    "mortgage": 30
+  },
+  "Income Tax": {
+    "type": "tax",
+    "tax": 200
+  },
   "Reading Railroad": {
     "type": "railroad",
     "set": "railroad",
     "price": 200,
     "mortgage": 100
+  },
+  "Oriental Avenue": {
+    "type": "street",
+    "set": "light blue",
+    "price": 100,
+    "base_rent": 6,
+    "premium_rent": [12,30,90,270,550],
+    "housing_cost": 50,
+    "mortgage": 50
+  },
+  "Vermont Avenue": {
+    "type": "street",
+    "set": "light blue",
+    "price": 100,
+    "base_rent": 6,
+    "premium_rent": [12,30,90,270,400,550],
+    "housing_cost": 50,
+    "mortgage": 50
+  },
+  "Connecticut": {
+    "type": "street",
+    "set": "light blue",
+    "price": 120,
+    "base_rent": 8,
+    "premium_rent": [16,40,100,300,450,600],
+    "housing_cost": 50,
+    "mortgage": 60
   },
   "Electric Company": {
     "type": "utility",
@@ -27,7 +70,17 @@
     "mortgage": 75
 
   },
+  "Water Works": {
+    "type": "utility",
+    "set": "utility",
+    "price": 150,
+    "mortgage": 75
+  },
   "Go To Jail": {
     "type": "jail"
+  },
+  "Luxury Tax": {
+    "type": "tax",
+    "tax": 100
   }
 }
