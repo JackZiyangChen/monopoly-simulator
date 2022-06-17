@@ -1,0 +1,58 @@
+{
+  "Boardwalk": {
+    "type": "chance",
+    "action": "move",
+    "location": 39,
+    "bonus": false,
+    "jail": false
+  },
+  "Back 3": {
+    "type": "chance",
+    "action": "step",
+    "steps": -3
+  },
+  "Dividend": {
+    "type": "chance",
+    "action": "money",
+    "amount": 50
+  },
+  "Chairman of Board": {
+    "type": "chance",
+    "action": "money_from_players",
+    "due_per_player": 50
+  },
+  "Housing Repair": {
+    "type": "chance",
+    "action": "housing",
+    "house_cost": 25,
+    "hotel_cost": 100
+  },
+  "Go to Jail Chances": {
+    "type": "chance",
+    "action": "move",
+    "location": "jail",
+    "bonus": false,
+    "jail": true
+  },
+  "Get out of Jail Chances": {
+    "type": "chance",
+    "action": "jail_card"
+  },
+  "Go to Jail Community Chest": {
+    "type": "community chest",
+    "action": "move",
+    "location": "jail",
+    "bonus": false,
+    "jail": true
+  },
+  "Get out of Jail Community Chest": {
+    "type": "community chest",
+    "action": "jail_card"
+  },
+  "Street Repair": {
+    "type": "Community Chest",
+    "action": "housing",
+    "house_cost": 40,
+    "hotel_cost": 115
+  }
+}
