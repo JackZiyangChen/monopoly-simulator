@@ -1,11 +1,10 @@
 import abc
 import math
+import random
 
 from . import utility
 from . import game
-from . import player
-from .player import Player
-from game import dice_roll
+
 
 
 class Tile:
@@ -24,7 +23,7 @@ class Tile:
 
 
 class Property(Tile):
-    owner: Player = player.Player()
+    owner = None
     is_owned = False
     price = 0
     base_rent = 0
@@ -35,7 +34,7 @@ class Property(Tile):
     # note: railroads/utility work differently
 
     def calculate_rent(self, game_master, **kwargs):
-        pass
+        return 0
 
     def round_action(self, player, game_state, **kwarg):
         if self.is_owned and not self.is_mortgaged:
@@ -56,8 +55,8 @@ class Property(Tile):
                 for p in game_state.players:
                     if not player.__eq__(p):
                         auction_players.append(p)
-                auction_winner= utility.auction(participants=auction_players,minimum_bid=self.price)
-                self.owner = game_state.players[auction_winner]
+                auction_winner= utility.auction(participants=auction_players,minimum_bid=1)
+                self.owner = game_state.players[auction_winner.id]
                 self.owner.properties_owned.append(self)
 
 
@@ -101,7 +100,7 @@ class Street(Property):
             if self.hotel>0:
                 return self.premium_rents[5]
             else:
-                return self.premium_rents[0]
+                return self.premium_rents[self.houses]
         else:
             return self.base_rent
 
@@ -171,7 +170,7 @@ class Drawable(Tile):
                 game_state.tiles[player.location].round_action(player=player,
                                                                game_state=game_state,
                                                                from_chances=from_chances,
-                                                               dice_roll=dice_roll())
+                                                               dice_roll=random.randint(1,6))
         elif action == 'step':
             player.location += card_info["steps"]
             game_state.tiles[player.location].round_action(player=player, game_state=game_state)
@@ -185,7 +184,7 @@ class Drawable(Tile):
             player.money += total
         elif action == 'jail_card':
             player.num_jail_card += 1
-            queue.pop(top_index)
+            queue.pop(queue[top_index])
             if self.drawable_type == 'chance':
                 game_state.chances_queue = queue
             else:
