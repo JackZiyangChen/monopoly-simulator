@@ -1,3 +1,6 @@
+import math
+
+from .tile import Property, Street
 
 
 class PlayerConcept:
@@ -32,6 +35,18 @@ class PlayerActionsHandler():
     def accept_trade(self, trade, **kwargs):
         return False
 
+    def build_houses_handler(self, max_houses, state):
+        return math.floor(0.5*max_houses)
+
+    def sell_houses_handler(self, max_houses, state):
+        return math.floor(0.5*max_houses)
+
+    def mortgage_handler(self, property_to_mortgage, state):
+        return False
+
+    def unmortgage_handler(self, property_to_unmortgage, state):
+        return False
+
 
 
 class Player(PlayerActionsHandler,PlayerConcept):
@@ -48,6 +63,22 @@ class Player(PlayerActionsHandler,PlayerConcept):
             if self.jail_actions_handler():
                 self.money -= 50
                 return True
+
+    def get_all_eligible_housing_tiles(self, game_state):
+        out = []
+        for p in self.properties_owned:
+            if isinstance(p,Street):
+                others = p.get_others_in_set(game_master=game_state)
+                is_eligible = True
+                for p_other in others:
+                    if p_other.is_mortgaged or p_other not in self.properties_owned:
+                        is_eligible = False
+                        break
+                if is_eligible:
+                    out.append(p)
+        return out
+
+
 
 
     def on_debt(self, amount):
