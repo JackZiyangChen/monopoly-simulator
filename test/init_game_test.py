@@ -16,8 +16,10 @@ if __name__ == '__main__':
 
 
     gs = game.initialize_game(players_list)
-    for t in gs.tiles:
-        print(t)
+    print(gs.__dict__())
+    # for t in gs.tiles:
+    #     print(t)
 
     properties_load_test(game_state=gs)
+    print(vars(gs.players[0]))
 
