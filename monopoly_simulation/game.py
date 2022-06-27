@@ -27,11 +27,59 @@ class GameState:
     community_chest_queue = []
     community_chest_queue_top = 0
 
+    in_game = True
+
+
 
     def __init__(self, players):
         self.players = players
+
+        self.tiles = []
+        self.eliminated_players = []
+        self.houses_remaining = 32
+        self.hotels_remaining = 12
+        self.round = 0
+
+        self.CHANCES_DICT = {}
+        self.COMMUNITY_CHEST_DICT = {}
+
+        self.chances_queue = []
+        self.chances_queue_top = 0
+        self.community_chest_queue = []
+        self.community_chest_queue_top = 0
+
         self.initialize_tiles()
         self.initialize_drawables()
+
+    def __dict__(self):
+        out = {'in_game': self.in_game, 'round': self.round, 'houses_remaining': self.houses_remaining,
+               'hotels_remaining': self.hotels_remaining}
+
+        tiles_dict = {}
+
+
+        drawable_dict = {}
+        chances_dict = {}
+        community_chests_dict = {}
+
+        chances_queue = [self.chances_queue[(i+self.chances_queue_top)%len(self.chances_queue)]
+                         for i in range(len(self.chances_queue))]
+
+        for i in range(len(chances_queue)):
+            chances_dict[str(i)] = chances_queue[i]
+        drawable_dict['chances'] = chances_dict
+
+        community_chests_queue = [self.community_chest_queue[(i + self.community_chest_queue_top) % len(self.community_chest_queue)]
+                         for i in range(len(self.community_chest_queue))]
+
+        for i in range(len(community_chests_queue)):
+            community_chests_dict[str(i)] = community_chests_queue[i]
+        drawable_dict['community_chests'] = community_chests_dict
+
+        out['drawable'] = drawable_dict
+
+        return out
+
 
 
     def initialize_tiles(self):
@@ -95,7 +143,7 @@ class GameState:
             src_dict = json.load(source_file)
 
         for k,v in src_dict.items():
-            if v['type'] == 'community_chest':
+            if v['type'] == 'community chest':
                 self.COMMUNITY_CHEST_DICT[k] = v
                 self.community_chest_queue.append(k)
             elif v['type'] == 'chance':
@@ -104,6 +152,7 @@ class GameState:
 
         random.shuffle(self.chances_queue)
         random.shuffle(self.community_chest_queue)
+
 
 
 
@@ -141,22 +190,22 @@ def game(number_of_players,**kwargs):
 
     gs=initialize_game(players_list) # initialize game state
 
-    in_game = True
     turn_player = 0
 
     # while game
-    while(in_game):
-        for p in gs.players:
-            p.player_action() # TODO: use specific functions for specific player action (e.g. trading)
-        # play turn
-        turn(gs[turn_player], state=gs, repeat_round=0)
+    while gs.in_game and gs.round < 500:
 
-        # trade
-        trade(state=gs)
+        housing_round(random.shuffle(gs.players.copy),game_state=gs)
+        # trade(state=gs) # handle trade
+        # TODO: handle mortgage and un-mortgage (latter is very important)
+
+        # play turn
+        turn(gs.players[turn_player], state=gs, repeat_round=0)
+
 
         # switch player
         turn_player = (turn_player + 1) % len(gs.players)
-        gs.round += 1
+        if turn_player == 0: gs.round += 1
 
 
 
@@ -203,10 +252,52 @@ def dice_roll():
 
 
 
-def buy_houses(participating_players):
-    # TODO: implement buy houses
+def housing_round(participating_players, game_state):
     for player in participating_players:
-        pass # prompt if buying houses
+        eligible_tiles = player.get_all_eligible_housing_tiles()
+        sets = []
+        if len(eligible_tiles) == 0:
+            continue
+
+        for tile in eligible_tiles:
+            if any(tile in s for s in sets):
+                continue
+            sets.append(tile.get_others_in_set(game_master=game_state).append(tile))
+
+        for street_set in sets:
+            total_possible = len(street_set) * 5
+            curr_houses = 0
+            for p in street_set:
+                curr_houses += p.houses
+            max_to_build = total_possible - curr_houses
+            max_can_afford = player.money // street_set[0].housing_cost
+            num_houses_to_build = player.build_houses_handler(max_houses=min(max_to_build,max_can_afford),
+                                                              state=game_state)
+
+            if num_houses_to_build > game_state.houses_remaining:
+                num_houses_to_build = game_state.houses_remaining - 1
+                house_bidders = []
+                for potential_bidder in participating_players:
+                    if potential_bidder.build_houses_handler(max_houses=2,state=game_state):
+                        house_bidders.append(potential_bidder)
+                winner = utility.auction(participants=house_bidders,minimum_bid=10)
+                # TODO: question: what to do with where to build?
+
+            total_cost = 0
+            street_set.sort(key=lambda prop_in_set:prop_in_set.houses)
+            for i in range(num_houses_to_build):
+                street_set[i%len(street_set)].houses += 1
+                game_state.houses_remaining -= 1
+                if street_set[i%len(street_set)].houses > 4 and game_state.hotels_remaining>0:
+                    street_set[i%len(street_set)].hotel += 1
+                    street_set[i % len(street_set)].houses = 0
+                    game_state.houses_remaining += 4
+                    game_state.hotels_remaining -= 1
+                total_cost += street_set[i%len(street_set)].housing_cost
+
+            if not utility.payment(player, 'bank',game_state,total_cost):
+                on_player_bankruptcy(player=player, game_state=game_state, debt_holder='bank')
+
 
 
 def trade(state):
@@ -220,6 +311,37 @@ def trade(state):
             trade_attempt = player.trade_handler(state=state)
             i+=1
 
+
+
+def on_player_bankruptcy(player,debt_holder,game_state):
+
+    if isinstance(debt_holder,Player):
+        for prop in player.properties_owned:
+            prop.owner = debt_holder
+            debt_holder.properties_owned.append(prop)
+            if prop.is_mortgaged:
+                debt_holder.unmortgage_handler(property_to_unmortgage=prop, state=game_state)
+            while prop.houses > 0:
+                prop.houses -= 1
+                game_state.houses_remaining += 1
+            while prop.hotel > 0:
+                prop.hotel -= 1
+                game_state.hotels_remaining += 1
+
+    else:
+        remainder_players = []
+        for pl in game_state.players:
+            if pl.id != player.id: remainder_players.append(pl)
+        for p in player.properties_owned:
+            p.is_mortgaged = False
+            p.is_owned = False
+            p.owner = None
+            utility.auction(participants=remainder_players,minimum_bid=p.price)
+
+    game_state.eliminated_players.append(player)
+    game_state.players.remove(player)
+    if game_state.players == 0: # game ends
+        game_state.in_game = False
 
 
 
