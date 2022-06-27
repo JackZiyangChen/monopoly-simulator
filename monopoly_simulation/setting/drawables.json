@@ -50,7 +50,7 @@
     "action": "jail_card"
   },
   "Street Repair": {
-    "type": "Community Chest",
+    "type": "community chest",
     "action": "housing",
     "house_cost": 40,
     "hotel_cost": 115
