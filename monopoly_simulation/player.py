@@ -8,10 +8,30 @@ class PlayerConcept:
     properties_owned = []
     money = 0
     rounds_in_jail = 0
-    mortgages = []
     location = 0
     num_jail_card = 0
     jail_card = num_jail_card > 0
+
+    def player_info(self):
+        out = {}
+        out['id']  = self.id
+        out['location'] = self.location
+        out['money'] = self.money
+        out['is_in_jail'] = self.rounds_in_jail > 0
+
+        assets = {} # jail card, money, sets, properties, mortgage
+        assets['jail_cards'] = self.jail_card
+        assets['money'] = self.money
+        assets['properties'] = {}
+        assets['mortgage'] = {}
+        assets['sets'] = []
+        for prop in self.properties_owned:
+            assets['mortgage' if prop.is_mortgaged else 'properties'].update({f'{str(prop.id)}': prop.name})
+            if prop.set not in assets['sets'] and all([p in self.properties_owned for p in prop.get_others_in_set()]):
+                assets['sets'].append(prop.set)
+
+        out.update({'assets': assets})
+        return out
 
 class PlayerActionsHandler():
     def jail_card_handler(self, **kwargs):

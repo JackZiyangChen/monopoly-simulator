@@ -23,6 +23,7 @@ class Tile:
 
 
 class Property(Tile):
+    id = 0 # increment based on the position on the board
     owner = None
     is_owned = False
     price = 0
@@ -46,7 +47,7 @@ class Property(Tile):
             self.owner.money += rent
         else:
             if player.buy_property_handler():
-                # buy prpoerty
+                # buy property
                 player.money -= self.price
                 self.owner = player
                 player.properties_owned.append(self)
@@ -69,6 +70,29 @@ class Property(Tile):
                     out.append(tile)
 
         return out
+
+    def property_info(self, game_state):
+        current_state = {}
+        current_state['is_owned'] = self.is_owned
+        current_state['owner'] = self.owner.id if self.is_owned else -1
+        current_state['is_mortgaged'] = self.is_mortgaged
+        current_state['current_rent'] = self.calculate_rent(game_master=game_state) if self.owner is not None else self.base_rent
+        if isinstance(self,Street):
+            current_state['houses'] = self.houses
+            current_state['hotel'] = self.hotel
+
+        info = {}
+        info['id'] = self.id
+        info['price'] = self.price
+        info['base_rent'] = self.base_rent
+        info['premium_rents'] = self.premium_rents
+        info['mortgage_value'] = self.mortgage
+        info['unmortgage'] = int(self.mortgage * 1.1)
+        if isinstance(self, Street):
+            info['housing_cost'] = self.housing_cost
+
+
+        return {'info':info,'current_state':current_state}
 
 
 
@@ -93,7 +117,7 @@ class Street(Property):
         set_owned = True
         other_properties = self.get_others_in_set(game_master=game_master)
         for p in other_properties:
-            if p not in self.owner.properties_owned:
+            if self.owner is None or p not in self.owner.properties_owned:
                 set_owned = False
 
         if set_owned:
@@ -112,7 +136,7 @@ class PublicProperty(Property):
         set_owned = True
         other_properties = self.get_others_in_set(game_master=game_master)
         for p in other_properties:
-            if p not in self.owner.properties_owned:
+            if self.owner is None or p not in self.owner.properties_owned:
                 set_owned = False
 
         if self.set == 'railroad':

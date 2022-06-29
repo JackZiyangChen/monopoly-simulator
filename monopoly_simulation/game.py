@@ -51,11 +51,35 @@ class GameState:
         self.initialize_tiles()
         self.initialize_drawables()
 
+
     def __dict__(self):
         out = {'in_game': self.in_game, 'round': self.round, 'houses_remaining': self.houses_remaining,
                'hotels_remaining': self.hotels_remaining}
 
         tiles_dict = {}
+        for t in self.tiles:
+            tile = {}
+            tile['name'] = t.name
+            tile['type'] = t.__class__.__name__
+            tiles_dict[str(t.position)] = tile
+        out['tiles'] = tiles_dict
+
+
+        properties_dict = {}
+        for property in self.tiles:
+            if isinstance(property,Property):
+                if property.set not in properties_dict.keys():
+                    properties_dict[property.set] = {}
+                properties_dict[property.set][property.name] = property.property_info(game_state=self)
+        out['properties'] = properties_dict
+
+
+        players_dict = {'active_players':{},'eliminated_players':{}}
+        for p in self.players:
+            players_dict['active_players'].update({f'{str(p.id)}': p.player_info()})
+        for p in self.eliminated_players:
+            players_dict['eliminated_players'].update({f'{str(p.id)}': p.player_info()})
+        out['players'] = players_dict
 
 
         drawable_dict = {}
@@ -136,6 +160,11 @@ class GameState:
 
         # sort through tiles list
         self.tiles.sort(key=lambda tile: tile.position)
+        prop_id_counter  = 0
+        for prop in self.tiles:
+            if isinstance(prop, Property):
+                prop.id = prop_id_counter
+                prop_id_counter += 1
 
     def initialize_drawables(self):
         curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -238,7 +267,7 @@ def turn(player, state, repeat_round):
     state.tiles[player.location].round_action(game_state=state, moves=moves)
 
     if player.money<0:
-        player.on_debt(amount=0-player.money)
+        player.on_debt(amount=0-player.money) # TODO: replace with tested payment method
 
 
     if rolls[0] == rolls[1]:
@@ -260,7 +289,7 @@ def housing_round(participating_players, game_state):
             continue
 
         for tile in eligible_tiles:
-            if any(tile in s for s in sets):
+            if any([tile in s for s in sets]):
                 continue
             sets.append(tile.get_others_in_set(game_master=game_state).append(tile))
 
@@ -340,7 +369,7 @@ def on_player_bankruptcy(player,debt_holder,game_state):
 
     game_state.eliminated_players.append(player)
     game_state.players.remove(player)
-    if game_state.players == 0: # game ends
+    if len(game_state.players) == 0: # game ends
         game_state.in_game = False
 
 
