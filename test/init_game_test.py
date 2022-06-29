@@ -17,6 +17,8 @@ if __name__ == '__main__':
 
     gs = game.initialize_game(players_list)
     print(gs.__dict__())
+    with open('game_state_output.json','w') as f:
+        json.dump(gs.__dict__(),f,indent=4)
     # for t in gs.tiles:
     #     print(t)
 
