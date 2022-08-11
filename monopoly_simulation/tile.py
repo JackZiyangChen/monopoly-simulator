@@ -83,6 +83,7 @@ class Property(Tile):
 
         info = {}
         info['id'] = self.id
+        info['position'] = self.position
         info['price'] = self.price
         info['base_rent'] = self.base_rent
         info['premium_rents'] = self.premium_rents
@@ -95,6 +96,26 @@ class Property(Tile):
         return {'info':info,'current_state':current_state}
 
 
+    def from_json(self,src,players_list):
+        self.is_owned = src['current_state']['is_owned']
+        self.is_mortgaged = src['current_state']['is_mortgaged']
+        if isinstance(self, Street):
+            self.houses = src['current_state']['houses']
+            self.hotel = src['current_state']['hotel']
+        for p in players_list:
+            if p.id == src['current_state']['owner']:
+                self.owner = p
+                break
+        if not self.is_owned:
+            self.owner = None
+        
+        self.id = src['info']['id']
+        self.price = src['info']['price']
+        self.base_rent = src['info']['base_rent']
+        self.premium_rents = src['info']['premium_rents']
+        self.mortgage = src['info']['mortgage_value']
+        if isinstance(self, Street):
+            self.housing_cost = src['info']['housing_cost']
 
 
 

@@ -18,6 +18,7 @@ class PlayerConcept:
         out['location'] = self.location
         out['money'] = self.money
         out['is_in_jail'] = self.rounds_in_jail > 0
+        out['round_in_jail'] = self.rounds_in_jail
 
         assets = {} # jail card, money, sets, properties, mortgage
         assets['jail_cards'] = self.jail_card
@@ -32,6 +33,18 @@ class PlayerConcept:
 
         out.update({'assets': assets})
         return out
+
+    def from_json(self,src, tiles):
+        self.id = src['id']
+        self.location = src['location']
+        self.is_in_jail = src['is_in_jail']
+        self.rounds_in_jail = src['round_in_jail']
+
+        self.money = src['money']
+        self.jail_card = src['assets']['jail_cards']
+        self.properties_owned = [tiles[p['position']] for p in src['assets']['properties']]
+        self.properties_owned.extend([tiles[p['position']] for p in src['assets']['mortgage']])
+    
 
 class PlayerActionsHandler():
     def jail_card_handler(self, **kwargs):
@@ -97,6 +110,9 @@ class Player(PlayerActionsHandler,PlayerConcept):
                 if is_eligible:
                     out.append(p)
         return out
+
+
+
 
 
 

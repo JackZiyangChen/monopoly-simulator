@@ -55,19 +55,19 @@ def payment(provider, receiver, game_state, amount):
         debt = abs(provider.money)
         money_available = 0
 
-        eligible_tiles = provider.get_all_eligible_housing_tiles()
+        eligible_tiles = provider.get_all_eligible_housing_tiles(game_state)
         sets = []
         for tile in eligible_tiles:
             if any(tile in s for s in sets):
                 continue
             sets.append(tile.get_others_in_set(game_master=game_state).append(tile))
 
-        sorted(sets,key=lambda item:item[0].position)
+        sets.sort(key=lambda item:item[0].position)
 
         # sell houses
         for set_of_properties in sets:
             total_houses = 0
-            sorted(set_of_properties, key=sort_by_housing)
+            set_of_properties.sort(key=sort_by_housing)
 
             for property in set_of_properties:
                 total_houses += property.houses
@@ -101,7 +101,7 @@ def payment(provider, receiver, game_state, amount):
 
         # mortgage
         player_properties = provider.properties_owned
-        sorted(player_properties,key=lambda item:item.position)
+        player_properties.sort(key=lambda item:item.position)
         for prop in player_properties:
             if provider.mortgage_handler(property_to_mortgage=prop,state=game_state):
                 prop.is_mortgaged = True

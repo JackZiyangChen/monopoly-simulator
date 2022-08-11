@@ -19,6 +19,11 @@ if __name__ == '__main__':
     print(gs.__dict__())
     with open('game_state_output.json','w') as f:
         json.dump(gs.__dict__(),f,indent=4)
+
+    gs.from_json_file('test/game_state_output.json')
+
+    with open('game_state_output_new.json','w') as f:
+        json.dump(gs.__dict__(),f,indent=4)
     # for t in gs.tiles:
     #     print(t)
 

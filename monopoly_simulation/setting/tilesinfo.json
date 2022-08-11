@@ -54,7 +54,7 @@
     "housing_cost": 50,
     "mortgage": 50
   },
-  "Connecticut": {
+  "Connecticut Avenue": {
     "type": "street",
     "set": "light blue",
     "price": 120,

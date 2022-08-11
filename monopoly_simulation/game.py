@@ -105,6 +105,62 @@ class GameState:
         return out
 
 
+    def from_json_file(self, file_name):
+        curr_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),'..')
+        with open(os.path.join(curr_dir, file_name), "r") as source_file:
+            src_dict = json.load(source_file)
+
+        self.from_json(src_dict)
+
+    def from_json(self, src_dict):
+
+        self.in_game = src_dict['in_game']
+        self.round = src_dict['round']
+        self.houses_remaining = src_dict['houses_remaining']
+        self.hotels_remaining = src_dict['hotels_remaining']
+
+        local_active_players = {}
+        for p in self.players:
+            local_active_players[str(p.id)] = p
+
+        active_players = src_dict['players']['active_players']
+        for k,v in active_players.items():
+            local_active_players[k].from_json(v, self.tiles)
+
+        local_eliminated_players = {}
+        for p in self.players:
+            local_eliminated_players[str(p.id)] = p
+
+        eliminated_players = src_dict['players']['eliminated_players']
+        for k, v in eliminated_players.items():
+            local_eliminated_players[int(k)].from_json(v, self.tiles)
+
+
+        local_tiles_info = {}
+        for t in self.tiles:
+            local_tiles_info[t.name] = t
+
+        properties = src_dict['properties']
+        for s in properties.values():
+            for k,v in s.items():
+                local_tiles_info[k].from_json(v,self.players)
+
+        
+
+        drawable = src_dict['drawable']
+        self.chances_queue_top = self.chances_queue.index(
+            drawable['chances'][min(drawable['chances'].keys())])
+        self.community_chest_queue_top = self.community_chest_queue.index(
+            drawable['community_chests'][min(drawable['community_chests'].keys())])
+
+
+
+
+
+
+        
+
+
 
     def initialize_tiles(self):
         map_data = {}
@@ -212,7 +268,7 @@ def initialize_game(players_list):
 def game(number_of_players,**kwargs):
 
 
-    players_list = kwargs.get('../players') if 'players' in kwargs.keys() else []
+    players_list = kwargs.get('players') if 'players' in kwargs.keys() else []
     for i in range(abs(number_of_players - len(players_list))):
         players_list.append(Player())
 
